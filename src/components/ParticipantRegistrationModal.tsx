@@ -23,7 +23,23 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
     institution: '', teacher: '', hearingComplaint: '', complaintDetails: '', observations: '',
   });
 
+  const { fetchCep, loading: cepLoading } = useCep();
+
   const update = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
+
+  const handleCepBlur = async (cepValue: string) => {
+    const data = await fetchCep(cepValue);
+    if (data) {
+      setForm(f => ({
+        ...f,
+        street: data.street || f.street,
+        neighborhood: data.neighborhood || f.neighborhood,
+        city: data.city || f.city,
+        state: data.state || f.state,
+        complement: data.complement || f.complement,
+      }));
+    }
+  };
 
   const handleSubmit = () => {
     addParticipant({
