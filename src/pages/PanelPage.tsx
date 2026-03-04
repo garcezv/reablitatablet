@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import OptionsSidebar from '@/components/OptionsSidebar';
 import AppHeader from '@/components/AppHeader';
 import PageHeader from '@/components/PageHeader';
 import InfoBanner from '@/components/InfoBanner';
@@ -15,10 +16,11 @@ export default function PanelPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showRegister, setShowRegister] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <AppHeader showMenu />
+      <AppHeader showMenu onMenuClick={() => setShowSidebar(true)} />
       <PageHeader title={t('panel.title')} showBack showLearnMore />
 
       <div className="px-4 py-4 space-y-4 flex-1">
@@ -87,6 +89,8 @@ export default function PanelPage() {
           onClose={() => setShowConfirm(false)}
         />
       )}
+
+      <OptionsSidebar open={showSidebar} onClose={() => setShowSidebar(false)} />
     </div>
   );
 }
