@@ -5,6 +5,7 @@ import CancelWarningModal from './CancelWarningModal';
 import { addParticipant } from '@/lib/data';
 import { Upload, Loader2 } from 'lucide-react';
 import { useCep } from '@/hooks/use-cep';
+import { isValidCPF, formatCPF } from '@/lib/cpf';
 
 interface Props {
   onClose: () => void;
@@ -13,6 +14,7 @@ interface Props {
 export default function ParticipantRegistrationModal({ onClose }: Props) {
   const { t } = useI18n();
   const [showCancel, setShowCancel] = useState(false);
+  const [cpfError, setCpfError] = useState('');
   const [form, setForm] = useState({
     cpf: '', fullName: '', birthDate: '', socialName: '',
     rg: '', issuingBody: '', issueDate: '',
@@ -41,7 +43,25 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
     }
   };
 
+  const handleCpfChange = (value: string) => {
+    const formatted = formatCPF(value);
+    update('cpf', formatted);
+    if (cpfError) setCpfError('');
+  };
+
+  const handleCpfBlur = () => {
+    if (form.cpf && !isValidCPF(form.cpf)) {
+      setCpfError(t('register.invalidCpf'));
+    } else {
+      setCpfError('');
+    }
+  };
+
   const handleSubmit = () => {
+    if (!isValidCPF(form.cpf)) {
+      setCpfError(t('register.invalidCpf'));
+      return;
+    }
     addParticipant({
       ...form,
       testPerformed: 'Aud.IT',
@@ -92,7 +112,19 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
         {/* Dados de identificação */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.idSection')}</h3>
         <div className="grid grid-cols-2 gap-3">
-          <Field label={t('register.cpf')} k="cpf" placeholder="000.000.000-00" required />
+          <div>
+            <label className="block text-xs text-foreground mb-1">
+              {t('register.cpf')} <span className="text-primary">◆</span>
+            </label>
+            <input
+              placeholder="000.000.000-00"
+              value={form.cpf}
+              onChange={e => handleCpfChange(e.target.value)}
+              onBlur={handleCpfBlur}
+              className={`w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring ${cpfError ? 'border-destructive' : 'border-input'}`}
+            />
+            {cpfError && <span className="text-xs text-destructive mt-0.5 block">{cpfError}</span>}
+          </div>
           <Field label={t('register.fullName')} k="fullName" placeholder="Ex: José Maria da Silva" required />
           <Field label={t('register.birthDate')} k="birthDate" type="date" required />
           <Field label={t('register.socialName')} k="socialName" placeholder="Ex: José Maria da Silva" />

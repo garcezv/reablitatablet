@@ -6,10 +6,13 @@ import InfoBanner from '@/components/InfoBanner';
 import { useI18n } from '@/lib/i18n';
 import { useCep } from '@/hooks/use-cep';
 import { Loader2 } from 'lucide-react';
+import { isValidCPF, formatCPF } from '@/lib/cpf';
 export default function RequestAccessPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { fetchCep, loading: cepLoading } = useCep();
+  const [cpf, setCpf] = useState('');
+  const [cpfError, setCpfError] = useState('');
   const [address, setAddress] = useState({ cep: '', state: '', city: '', neighborhood: '', street: '', number: '', complement: '' });
 
   const handleCepBlur = async (cepValue: string) => {
@@ -48,7 +51,14 @@ export default function RequestAccessPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.cpf')} <span className="text-primary">◆</span></label>
-              <input placeholder="000.000.000-00" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="000.000.000-00"
+                value={cpf}
+                onChange={e => { setCpf(formatCPF(e.target.value)); if (cpfError) setCpfError(''); }}
+                onBlur={() => { if (cpf && !isValidCPF(cpf)) setCpfError(t('register.invalidCpf')); else setCpfError(''); }}
+                className={`w-full border rounded-md px-3 py-2 text-sm bg-background ${cpfError ? 'border-destructive' : 'border-input'}`}
+              />
+              {cpfError && <span className="text-xs text-destructive mt-0.5 block">{cpfError}</span>}
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.fullName')} <span className="text-primary">◆</span></label>
