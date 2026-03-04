@@ -66,6 +66,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'register.lgpd': 'Os dados pessoais dos serão coletados com a finalidade exclusiva de pesquisa e/ou testagem auditiva, com base no seu consentimento. Eles não serão compartilhados com terceiros e serão armazenados de forma segura até a solicitação de exclusão. Confira nossa política completa de proteção de dados.',
     'register.idSection': 'Dados de identificação',
     'register.cpf': 'CPF',
+    'register.invalidCpf': 'CPF inválido. Verifique os dígitos.',
     'register.fullName': 'Nome completo',
     'register.birthDate': 'Data de nascimento',
     'register.socialName': 'Nome social',
