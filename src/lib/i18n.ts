@@ -206,6 +206,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'register.lgpd': 'Personal data collected exclusively for research/hearing testing, with your consent.',
     'register.idSection': 'Identification data',
     'register.cpf': 'CPF',
+    'register.invalidCpf': 'Invalid CPF. Check the digits.',
     'register.fullName': 'Full name',
     'register.birthDate': 'Date of birth',
     'register.socialName': 'Social name',
