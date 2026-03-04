@@ -9,7 +9,22 @@ import { Loader2 } from 'lucide-react';
 export default function RequestAccessPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const { fetchCep, loading: cepLoading } = useCep();
+  const [address, setAddress] = useState({ cep: '', state: '', city: '', neighborhood: '', street: '', number: '', complement: '' });
 
+  const handleCepBlur = async (cepValue: string) => {
+    const data = await fetchCep(cepValue);
+    if (data) {
+      setAddress(a => ({
+        ...a,
+        street: data.street || a.street,
+        neighborhood: data.neighborhood || a.neighborhood,
+        city: data.city || a.city,
+        state: data.state || a.state,
+        complement: data.complement || a.complement,
+      }));
+    }
+  };
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
