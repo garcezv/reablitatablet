@@ -11,6 +11,8 @@ export default function RequestAccessPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { fetchCep, loading: cepLoading } = useCep();
+  const [cpf, setCpf] = useState('');
+  const [cpfError, setCpfError] = useState('');
   const [address, setAddress] = useState({ cep: '', state: '', city: '', neighborhood: '', street: '', number: '', complement: '' });
 
   const handleCepBlur = async (cepValue: string) => {
