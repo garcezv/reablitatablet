@@ -4,6 +4,7 @@ import AppHeader from '@/components/AppHeader';
 import PageHeader from '@/components/PageHeader';
 import { useI18n } from '@/lib/i18n';
 import SelectParticipantsModal from '@/components/SelectParticipantsModal';
+import OptionsSidebar from '@/components/OptionsSidebar';
 import logoOuvirBrasil from '@/assets/logo-ouvir-brasil.png';
 import logoAudit from '@/assets/logo-audit.png';
 
@@ -11,10 +12,11 @@ export default function HomePage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [showSelectModal, setShowSelectModal] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <AppHeader showMenu />
+      <AppHeader showMenu onMenuClick={() => setShowSidebar(true)} />
       <PageHeader title={t('home.page')} showLearnMore />
       <div className="flex-1 px-4 py-4 space-y-4">
         <h1 className="text-2xl font-bold text-foreground">{t('home.welcome')}</h1>
@@ -65,6 +67,8 @@ export default function HomePage() {
       {showSelectModal && (
         <SelectParticipantsModal onClose={() => setShowSelectModal(false)} />
       )}
+
+      <OptionsSidebar open={showSidebar} onClose={() => setShowSidebar(false)} />
     </div>
   );
 }

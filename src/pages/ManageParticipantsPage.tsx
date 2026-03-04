@@ -3,16 +3,18 @@ import AppHeader from '@/components/AppHeader';
 import PageHeader from '@/components/PageHeader';
 import ParticipantsTable from '@/components/ParticipantsTable';
 import ParticipantRegistrationModal from '@/components/ParticipantRegistrationModal';
+import OptionsSidebar from '@/components/OptionsSidebar';
 import { useI18n } from '@/lib/i18n';
 
 export default function ManageParticipantsPage() {
   const { t } = useI18n();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showRegister, setShowRegister] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <AppHeader showMenu />
+      <AppHeader showMenu onMenuClick={() => setShowSidebar(true)} />
       <PageHeader title={t('manage.title')} showBack showLearnMore />
       <div className="flex-1 px-4 py-4 space-y-4">
         <div className="border border-border rounded-lg p-4 space-y-3">
@@ -43,6 +45,8 @@ export default function ManageParticipantsPage() {
       {showRegister && (
         <ParticipantRegistrationModal onClose={() => setShowRegister(false)} />
       )}
+
+      <OptionsSidebar open={showSidebar} onClose={() => setShowSidebar(false)} />
     </div>
   );
 }
