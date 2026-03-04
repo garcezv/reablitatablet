@@ -6,6 +6,7 @@ import InfoBanner from '@/components/InfoBanner';
 import { useI18n } from '@/lib/i18n';
 import { useCep } from '@/hooks/use-cep';
 import { Loader2 } from 'lucide-react';
+import { isValidCPF, formatCPF } from '@/lib/cpf';
 export default function RequestAccessPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
