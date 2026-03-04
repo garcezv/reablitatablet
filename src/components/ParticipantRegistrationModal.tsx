@@ -175,7 +175,8 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
       {showCancel && (
         <CancelWarningModal
           title={t('cancelRegister.title')}
-          message={t('cancelRegister.message')}
+          message="Tem certeza que deseja cancelar? essa ação não poderá ser desfeita."
+          confirmLabel="Cancelar cadastro"
           onBack={() => setShowCancel(false)}
           onConfirm={onClose}
         />

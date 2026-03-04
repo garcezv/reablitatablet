@@ -4,6 +4,8 @@ import AppHeader from '@/components/AppHeader';
 import PageHeader from '@/components/PageHeader';
 import { useI18n } from '@/lib/i18n';
 import SelectParticipantsModal from '@/components/SelectParticipantsModal';
+import logoOuvirBrasil from '@/assets/logo-ouvir-brasil.png';
+import logoAudit from '@/assets/logo-audit.png';
 
 export default function HomePage() {
   const { t } = useI18n();
@@ -23,9 +25,7 @@ export default function HomePage() {
           <div className="border border-border rounded-lg p-4 relative">
             <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5">+18</div>
             <div className="flex flex-col items-center mb-3">
-              <div className="w-16 h-16 rounded-full bg-success flex items-center justify-center mb-2">
-                <span className="text-2xl">👂</span>
-              </div>
+              <img src={logoOuvirBrasil} alt="Ouvir Brasil" className="w-20 h-20 object-contain mb-2" />
               <span className="text-sm font-medium text-foreground">Ouvir Brasil</span>
             </div>
             <h3 className="text-sm font-semibold text-foreground mb-1">{t('home.triageRapid')}</h3>
@@ -40,10 +40,7 @@ export default function HomePage() {
           <div className="border border-border rounded-lg p-4 relative">
             <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5">+4</div>
             <div className="flex flex-col items-center mb-3">
-              <div className="w-16 h-16 rounded-full bg-info flex items-center justify-center mb-2">
-                <span className="text-2xl">🧒</span>
-              </div>
-              <span className="text-sm font-medium text-foreground">aud.IT</span>
+              <img src={logoAudit} alt="aud.IT" className="w-20 h-20 object-contain mb-2" />
             </div>
             <h3 className="text-sm font-semibold text-foreground mb-1">{t('home.triagePediatric')}</h3>
             <p className="text-xs text-muted-foreground mb-3">{t('home.triagePediatricDesc')}</p>
