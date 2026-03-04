@@ -4,7 +4,8 @@ import AppHeader from '@/components/AppHeader';
 import PageHeader from '@/components/PageHeader';
 import InfoBanner from '@/components/InfoBanner';
 import { useI18n } from '@/lib/i18n';
-
+import { useCep } from '@/hooks/use-cep';
+import { Loader2 } from 'lucide-react';
 export default function RequestAccessPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
