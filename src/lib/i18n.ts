@@ -346,6 +346,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'register.lgpd': 'Datos recopilados exclusivamente para investigación/prueba auditiva.',
     'register.idSection': 'Datos de identificación',
     'register.cpf': 'CPF',
+    'register.invalidCpf': 'CPF inválido. Verifique los dígitos.',
     'register.fullName': 'Nombre completo',
     'register.birthDate': 'Fecha de nacimiento',
     'register.socialName': 'Nombre social',
