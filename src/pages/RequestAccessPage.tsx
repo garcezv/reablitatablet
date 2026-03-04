@@ -4,11 +4,27 @@ import AppHeader from '@/components/AppHeader';
 import PageHeader from '@/components/PageHeader';
 import InfoBanner from '@/components/InfoBanner';
 import { useI18n } from '@/lib/i18n';
-
+import { useCep } from '@/hooks/use-cep';
+import { Loader2 } from 'lucide-react';
 export default function RequestAccessPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const { fetchCep, loading: cepLoading } = useCep();
+  const [address, setAddress] = useState({ cep: '', state: '', city: '', neighborhood: '', street: '', number: '', complement: '' });
 
+  const handleCepBlur = async (cepValue: string) => {
+    const data = await fetchCep(cepValue);
+    if (data) {
+      setAddress(a => ({
+        ...a,
+        street: data.street || a.street,
+        neighborhood: data.neighborhood || a.neighborhood,
+        city: data.city || a.city,
+        state: data.state || a.state,
+        complement: data.complement || a.complement,
+      }));
+    }
+  };
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
@@ -90,31 +106,64 @@ export default function RequestAccessPage() {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.cep')} <span className="text-primary">◆</span></label>
-              <input placeholder="00000-000" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <div className="relative">
+                <input
+                  placeholder="00000-000"
+                  value={address.cep}
+                  onChange={e => setAddress(a => ({ ...a, cep: e.target.value }))}
+                  onBlur={e => handleCepBlur(e.target.value)}
+                  className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                />
+                {cepLoading && <Loader2 className="absolute right-2 top-2.5 w-4 h-4 animate-spin text-muted-foreground" />}
+              </div>
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.state')} <span className="text-primary">◆</span></label>
-              <select className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background">
-                <option>{t('common.select')}</option>
+              <select
+                value={address.state}
+                onChange={e => setAddress(a => ({ ...a, state: e.target.value }))}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              >
+                <option value="">{t('common.select')}</option>
+                {['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].map(uf => (
+                  <option key={uf} value={uf}>{uf}</option>
+                ))}
               </select>
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.city')} <span className="text-primary">◆</span></label>
-              <input placeholder={t('common.search')} className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder={t('common.search')}
+                value={address.city}
+                onChange={e => setAddress(a => ({ ...a, city: e.target.value }))}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.neighborhood')} <span className="text-primary">◆</span></label>
-              <input className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                value={address.neighborhood}
+                onChange={e => setAddress(a => ({ ...a, neighborhood: e.target.value }))}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.street')} <span className="text-primary">◆</span></label>
-              <input className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                value={address.street}
+                onChange={e => setAddress(a => ({ ...a, street: e.target.value }))}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.number')} <span className="text-primary">◆</span></label>
-              <input className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                value={address.number}
+                onChange={e => setAddress(a => ({ ...a, number: e.target.value }))}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

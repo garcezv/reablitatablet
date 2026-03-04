@@ -3,7 +3,8 @@ import { useI18n } from '@/lib/i18n';
 import InfoBanner from './InfoBanner';
 import CancelWarningModal from './CancelWarningModal';
 import { addParticipant } from '@/lib/data';
-import { Upload } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
+import { useCep } from '@/hooks/use-cep';
 
 interface Props {
   onClose: () => void;
@@ -22,7 +23,23 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
     institution: '', teacher: '', hearingComplaint: '', complaintDetails: '', observations: '',
   });
 
+  const { fetchCep, loading: cepLoading } = useCep();
+
   const update = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
+
+  const handleCepBlur = async (cepValue: string) => {
+    const data = await fetchCep(cepValue);
+    if (data) {
+      setForm(f => ({
+        ...f,
+        street: data.street || f.street,
+        neighborhood: data.neighborhood || f.neighborhood,
+        city: data.city || f.city,
+        state: data.state || f.state,
+        complement: data.complement || f.complement,
+      }));
+    }
+  };
 
   const handleSubmit = () => {
     addParticipant({
@@ -109,7 +126,19 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
         {/* Endereço */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.address')}</h3>
         <div className="grid grid-cols-3 gap-3">
-          <Field label={t('register.cep')} k="cep" placeholder="00000-000" />
+          <div>
+            <label className="block text-xs text-foreground mb-1">{t('register.cep')}</label>
+            <div className="relative">
+              <input
+                placeholder="00000-000"
+                value={form.cep}
+                onChange={e => update('cep', e.target.value)}
+                onBlur={e => handleCepBlur(e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              {cepLoading && <Loader2 className="absolute right-2 top-2.5 w-4 h-4 animate-spin text-muted-foreground" />}
+            </div>
+          </div>
           <SelectField label={t('register.state')} k="state" options={['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']} />
           <Field label={t('register.city')} k="city" placeholder={t('common.search')} />
         </div>
