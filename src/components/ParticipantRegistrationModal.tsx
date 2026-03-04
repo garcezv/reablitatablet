@@ -14,6 +14,7 @@ interface Props {
 export default function ParticipantRegistrationModal({ onClose }: Props) {
   const { t } = useI18n();
   const [showCancel, setShowCancel] = useState(false);
+  const [cpfError, setCpfError] = useState('');
   const [form, setForm] = useState({
     cpf: '', fullName: '', birthDate: '', socialName: '',
     rg: '', issuingBody: '', issueDate: '',
