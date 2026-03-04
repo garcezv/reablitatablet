@@ -5,6 +5,7 @@ import CancelWarningModal from './CancelWarningModal';
 import { addParticipant } from '@/lib/data';
 import { Upload, Loader2 } from 'lucide-react';
 import { useCep } from '@/hooks/use-cep';
+import { isValidCPF, formatCPF } from '@/lib/cpf';
 
 interface Props {
   onClose: () => void;
