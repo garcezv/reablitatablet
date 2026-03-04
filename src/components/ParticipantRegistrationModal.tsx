@@ -3,7 +3,8 @@ import { useI18n } from '@/lib/i18n';
 import InfoBanner from './InfoBanner';
 import CancelWarningModal from './CancelWarningModal';
 import { addParticipant } from '@/lib/data';
-import { Upload } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
+import { useCep } from '@/hooks/use-cep';
 
 interface Props {
   onClose: () => void;
