@@ -7,6 +7,7 @@ import ParticipantsTable from '@/components/ParticipantsTable';
 import ParticipantRegistrationModal from '@/components/ParticipantRegistrationModal';
 import ConfirmParticipantsModal from '@/components/ConfirmParticipantsModal';
 import { useI18n } from '@/lib/i18n';
+import logoAudit from '@/assets/logo-audit.png';
 
 export default function PanelPage() {
   const { t } = useI18n();
@@ -23,9 +24,7 @@ export default function PanelPage() {
       <div className="px-4 py-4 space-y-4 flex-1">
         {/* Logo */}
         <div className="flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-info flex items-center justify-center">
-            <span className="text-3xl">🧒</span>
-          </div>
+          <img src={logoAudit} alt="aud.IT" className="h-20 object-contain" />
         </div>
 
         {/* Step buttons */}
