@@ -43,7 +43,25 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
     }
   };
 
+  const handleCpfChange = (value: string) => {
+    const formatted = formatCPF(value);
+    update('cpf', formatted);
+    if (cpfError) setCpfError('');
+  };
+
+  const handleCpfBlur = () => {
+    if (form.cpf && !isValidCPF(form.cpf)) {
+      setCpfError(t('register.invalidCpf'));
+    } else {
+      setCpfError('');
+    }
+  };
+
   const handleSubmit = () => {
+    if (!isValidCPF(form.cpf)) {
+      setCpfError(t('register.invalidCpf'));
+      return;
+    }
     addParticipant({
       ...form,
       testPerformed: 'Aud.IT',
