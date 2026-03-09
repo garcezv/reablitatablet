@@ -1,4 +1,4 @@
-# Rede reab.LITA (tablet) — Documentação Completa
+# Rede reab.LITA (tablet) — Documentação Completa do Protótipo Codificado Experimental
 # Versão Tablet
 
 ## Índice
