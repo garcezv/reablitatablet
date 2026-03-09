@@ -4,16 +4,37 @@ import AppHeader from '@/components/AppHeader';
 import PageHeader from '@/components/PageHeader';
 import InfoBanner from '@/components/InfoBanner';
 import { useI18n } from '@/lib/i18n';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const { signIn, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  if (user) {
+    navigate('/home', { replace: true });
+    return null;
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/home');
+    if (!email || !password) {
+      toast.error('Preencha e-mail e senha.');
+      return;
+    }
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    if (error) {
+      toast.error('Credenciais inválidas. Verifique e-mail e senha.');
+    } else {
+      navigate('/home');
+    }
   };
 
   return (
@@ -45,8 +66,12 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="w-full bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">
-            {t('login.submit')}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm disabled:opacity-50"
+          >
+            {loading ? 'Acessando...' : t('login.submit')}
           </button>
           <button type="button" className="w-full border border-input py-3 rounded-md text-sm text-foreground">
             {t('login.forgot')}

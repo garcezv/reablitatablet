@@ -2,7 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RequestAccessPage from "./pages/RequestAccessPage";
 import HomePage from "./pages/HomePage";
@@ -19,18 +21,20 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/request-access" element={<RequestAccessPage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/panel" element={<PanelPage />} />
-          <Route path="/instructions" element={<InstructionsPage />} />
-          <Route path="/noise-check" element={<NoiseCheckPage />} />
-          <Route path="/manage-participants" element={<ManageParticipantsPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/request-access" element={<RequestAccessPage />} />
+            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/panel" element={<ProtectedRoute><PanelPage /></ProtectedRoute>} />
+            <Route path="/instructions" element={<ProtectedRoute><InstructionsPage /></ProtectedRoute>} />
+            <Route path="/noise-check" element={<ProtectedRoute><NoiseCheckPage /></ProtectedRoute>} />
+            <Route path="/manage-participants" element={<ProtectedRoute><ManageParticipantsPage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

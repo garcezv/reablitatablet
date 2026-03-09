@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n';
-import { getParticipants } from '@/lib/data';
+import { fetchParticipants, type ParticipantWithTest } from '@/lib/participants';
 import ConfirmParticipantsModal from './ConfirmParticipantsModal';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 
 interface Props {
   onClose: () => void;
@@ -10,9 +10,17 @@ interface Props {
 
 export default function SelectParticipantsModal({ onClose }: Props) {
   const { t } = useI18n();
-  const participants = getParticipants().slice(0, 10);
+  const [participants, setParticipants] = useState<ParticipantWithTest[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    fetchParticipants()
+      .then(data => setParticipants(data.slice(0, 10)))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev =>
@@ -28,28 +36,36 @@ export default function SelectParticipantsModal({ onClose }: Props) {
           <button onClick={onClose}><X className="w-5 h-5 text-muted-foreground" /></button>
         </div>
 
-        <div className="space-y-2">
-          {participants.map(p => (
-            <label key={p.id} className="flex items-center gap-3 border border-border rounded-md px-3 py-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedIds.includes(p.id)}
-                onChange={() => toggleSelect(p.id)}
-                className="accent-primary"
-              />
-              <div>
-                <span className="text-sm text-foreground">{p.fullName}</span>
-                <span className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
-                  p.testPerformed === 'Aud.IT'
-                    ? 'bg-badge-audit text-badge-audit-foreground'
-                    : 'bg-badge-ouvir text-badge-ouvir-foreground'
-                }`}>
-                  {p.testPerformed}
-                </span>
-              </div>
-            </label>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        ) : participants.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">Nenhum participante cadastrado.</p>
+        ) : (
+          <div className="space-y-2">
+            {participants.map(p => (
+              <label key={p.id} className="flex items-center gap-3 border border-border rounded-md px-3 py-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(p.id)}
+                  onChange={() => toggleSelect(p.id)}
+                  className="accent-primary"
+                />
+                <div>
+                  <span className="text-sm text-foreground">{p.full_name}</span>
+                  <span className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
+                    p.testPerformed === 'Aud.IT'
+                      ? 'bg-badge-audit text-badge-audit-foreground'
+                      : 'bg-badge-ouvir text-badge-ouvir-foreground'
+                  }`}>
+                    {p.testPerformed}
+                  </span>
+                </div>
+              </label>
+            ))}
+          </div>
+        )}
 
         <button
           onClick={() => selectedIds.length > 0 && setShowConfirm(true)}
