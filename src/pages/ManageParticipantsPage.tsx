@@ -11,6 +11,7 @@ export default function ManageParticipantsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showRegister, setShowRegister] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -38,12 +39,16 @@ export default function ManageParticipantsPage() {
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             showLinesPerPage
+            refreshKey={refreshKey}
           />
         </div>
       </div>
 
       {showRegister && (
-        <ParticipantRegistrationModal onClose={() => setShowRegister(false)} />
+        <ParticipantRegistrationModal
+          onClose={() => setShowRegister(false)}
+          onSuccess={() => setRefreshKey(k => k + 1)}
+        />
       )}
 
       <OptionsSidebar open={showSidebar} onClose={() => setShowSidebar(false)} />

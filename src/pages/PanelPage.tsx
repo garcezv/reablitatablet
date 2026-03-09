@@ -17,6 +17,7 @@ export default function PanelPage() {
   const [showRegister, setShowRegister] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -24,12 +25,10 @@ export default function PanelPage() {
       <PageHeader title={t('panel.title')} showBack showLearnMore />
 
       <div className="px-4 py-4 space-y-4 flex-1">
-        {/* Logo */}
         <div className="flex justify-center">
           <img src={logoAudit} alt="aud.IT" className="h-20 object-contain" />
         </div>
 
-        {/* Step buttons */}
         <div className="flex gap-2">
           <button onClick={() => navigate('/instructions')} className="flex-1 py-2 border border-primary rounded-md text-sm text-primary font-medium">
             {t('panel.instructions')}
@@ -45,7 +44,6 @@ export default function PanelPage() {
           </button>
         </div>
 
-        {/* Participants section */}
         <div className="border border-border rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-foreground">{t('panel.selectParticipants')}</h2>
@@ -68,10 +66,10 @@ export default function PanelPage() {
           <ParticipantsTable
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
+            refreshKey={refreshKey}
           />
         </div>
 
-        {/* Start test button */}
         <button
           onClick={() => selectedIds.length > 0 && setShowConfirm(true)}
           className="w-full bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm"
@@ -81,7 +79,10 @@ export default function PanelPage() {
       </div>
 
       {showRegister && (
-        <ParticipantRegistrationModal onClose={() => setShowRegister(false)} />
+        <ParticipantRegistrationModal
+          onClose={() => setShowRegister(false)}
+          onSuccess={() => setRefreshKey(k => k + 1)}
+        />
       )}
       {showConfirm && (
         <ConfirmParticipantsModal

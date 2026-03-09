@@ -7,13 +7,25 @@ import { useI18n } from '@/lib/i18n';
 import { useCep } from '@/hooks/use-cep';
 import { Loader2 } from 'lucide-react';
 import { isValidCPF, formatCPF } from '@/lib/cpf';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
 export default function RequestAccessPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { fetchCep, loading: cepLoading } = useCep();
+  const [saving, setSaving] = useState(false);
   const [cpf, setCpf] = useState('');
   const [cpfError, setCpfError] = useState('');
+  const [form, setForm] = useState({
+    fullName: '', birthDate: '', socialName: '',
+    email: '', confirmEmail: '', personalPhone: '', institutionalPhone: '',
+    accessType: '', professionalRegister: '', systemFunction: '',
+    institutionType: '',
+  });
   const [address, setAddress] = useState({ cep: '', state: '', city: '', neighborhood: '', street: '', number: '', complement: '' });
+
+  const update = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
 
   const handleCepBlur = async (cepValue: string) => {
     const data = await fetchCep(cepValue);
@@ -28,6 +40,53 @@ export default function RequestAccessPage() {
       }));
     }
   };
+
+  const handleSubmit = async () => {
+    if (!form.fullName || !form.email || !cpf || !form.personalPhone) {
+      toast.error('Preencha todos os campos obrigatórios.');
+      return;
+    }
+    if (!isValidCPF(cpf)) {
+      setCpfError(t('register.invalidCpf'));
+      return;
+    }
+    if (form.email !== form.confirmEmail) {
+      toast.error('Os e-mails não conferem.');
+      return;
+    }
+
+    setSaving(true);
+    const { error } = await supabase.from('access_requests').insert({
+      full_name: form.fullName,
+      cpf,
+      email: form.email,
+      confirm_email: form.confirmEmail,
+      personal_phone: form.personalPhone,
+      institutional_phone: form.institutionalPhone || null,
+      birth_date: form.birthDate || null,
+      social_name: form.socialName || null,
+      access_type: form.accessType || null,
+      professional_register: form.professionalRegister || null,
+      system_function: form.systemFunction || null,
+      institution_type: form.institutionType || null,
+      cep: address.cep || null,
+      state: address.state || null,
+      city: address.city || null,
+      neighborhood: address.neighborhood || null,
+      street: address.street || null,
+      number: address.number || null,
+      complement: address.complement || null,
+    });
+    setSaving(false);
+
+    if (error) {
+      toast.error(error.message || 'Erro ao enviar solicitação.');
+    } else {
+      toast.success('Solicitação enviada com sucesso!');
+      navigate('/');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
@@ -36,17 +95,21 @@ export default function RequestAccessPage() {
         <InfoBanner text={t('request.lgpd')} variant="warning" />
 
         <div className="space-y-4">
-          {/* Tipo de acesso */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
               {t('request.accessType')} <span className="text-primary">◆</span>
             </label>
-            <select className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background">
-              <option>{t('request.selectAccessType')}</option>
+            <select
+              value={form.accessType}
+              onChange={e => update('accessType', e.target.value)}
+              className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+            >
+              <option value="">{t('request.selectAccessType')}</option>
+              <option value="facilitator">Facilitador</option>
+              <option value="researcher">Pesquisador</option>
             </select>
           </div>
 
-          {/* Dados de identificação */}
           <h3 className="font-semibold text-foreground">{t('register.idSection')}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -62,55 +125,100 @@ export default function RequestAccessPage() {
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.fullName')} <span className="text-primary">◆</span></label>
-              <input placeholder="Insira seu nome completo" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="Insira seu nome completo"
+                value={form.fullName}
+                onChange={e => update('fullName', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.birthDate')} <span className="text-primary">◆</span></label>
-              <input placeholder="00/00/0000" type="date" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                type="date"
+                value={form.birthDate}
+                onChange={e => update('birthDate', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.socialName')}</label>
-              <input placeholder="Insira seu nome social caso possuir" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="Insira seu nome social caso possuir"
+                value={form.socialName}
+                onChange={e => update('socialName', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
           </div>
 
-          {/* Contatos */}
           <h3 className="font-semibold text-foreground">{t('register.contacts')}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-foreground mb-1">{t('login.email')} <span className="text-primary">◆</span></label>
-              <input placeholder="exemplo@email.com" type="email" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="exemplo@email.com"
+                type="email"
+                value={form.email}
+                onChange={e => update('email', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('request.confirmEmail')} <span className="text-primary">◆</span></label>
-              <input type="email" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                type="email"
+                value={form.confirmEmail}
+                onChange={e => update('confirmEmail', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('request.personalPhone')} <span className="text-primary">◆</span></label>
-              <input placeholder="(DDD)00000-0000" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="(DDD)00000-0000"
+                value={form.personalPhone}
+                onChange={e => update('personalPhone', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('request.institutionalPhone')}</label>
-              <input placeholder="(DDD)00000-0000" className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="(DDD)00000-0000"
+                value={form.institutionalPhone}
+                onChange={e => update('institutionalPhone', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
           </div>
 
-          {/* Dados profissionais */}
           <h3 className="font-semibold text-foreground">{t('request.professionalData')}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-foreground mb-1">{t('request.professionalRegister')} <span className="text-primary">◆</span></label>
-              <select className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background">
-                <option>{t('request.selectRegister')}</option>
+              <select
+                value={form.professionalRegister}
+                onChange={e => update('professionalRegister', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              >
+                <option value="">{t('request.selectRegister')}</option>
+                <option value="CRFa">CRFa</option>
+                <option value="CRM">CRM</option>
+                <option value="Outro">Outro</option>
               </select>
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('request.systemFunction')} <span className="text-primary">◆</span></label>
-              <input placeholder="Administrador, facilitador, pesquisador..." className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="Administrador, facilitador, pesquisador..."
+                value={form.systemFunction}
+                onChange={e => update('systemFunction', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
           </div>
 
-          {/* Endereço institucional */}
           <h3 className="font-semibold text-foreground">{t('request.institutionalAddress')}</h3>
           <p className="text-xs text-muted-foreground">{t('request.institutionalAddressNote')}</p>
           <div className="grid grid-cols-3 gap-3">
@@ -179,11 +287,20 @@ export default function RequestAccessPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-foreground mb-1">{t('request.type')} <span className="text-primary">◆</span></label>
-              <input placeholder="UBS, Instituição de ensino..." className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                placeholder="UBS, Instituição de ensino..."
+                value={form.institutionType}
+                onChange={e => update('institutionType', e.target.value)}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
             <div>
               <label className="block text-xs text-foreground mb-1">{t('register.complement')}</label>
-              <input className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" />
+              <input
+                value={address.complement}
+                onChange={e => setAddress(a => ({ ...a, complement: e.target.value }))}
+                className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+              />
             </div>
           </div>
 
@@ -191,8 +308,12 @@ export default function RequestAccessPage() {
             <button onClick={() => navigate(-1)} className="px-6 py-2 border border-primary rounded-md text-sm text-primary">
               {t('request.cancel')}
             </button>
-            <button className="px-6 py-2 bg-primary text-primary-foreground rounded-md text-sm font-semibold">
-              {t('request.send')}
+            <button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="px-6 py-2 bg-primary text-primary-foreground rounded-md text-sm font-semibold disabled:opacity-50"
+            >
+              {saving ? 'Enviando...' : t('request.send')}
             </button>
           </div>
         </div>
