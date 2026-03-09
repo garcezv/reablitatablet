@@ -1,20 +1,31 @@
-import { useState } from 'react';
-import { getParticipants } from '@/lib/data';
+import { useState, useEffect } from 'react';
+import { fetchParticipants, type ParticipantWithTest } from '@/lib/participants';
 import { useI18n } from '@/lib/i18n';
-import { MoreVertical, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Download } from 'lucide-react';
+import { MoreVertical, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Download, Loader2 } from 'lucide-react';
 
 interface ParticipantsTableProps {
   selectedIds: string[];
   onSelectionChange: (ids: string[]) => void;
   showLinesPerPage?: boolean;
+  refreshKey?: number;
 }
 
-export default function ParticipantsTable({ selectedIds, onSelectionChange, showLinesPerPage }: ParticipantsTableProps) {
+export default function ParticipantsTable({ selectedIds, onSelectionChange, showLinesPerPage, refreshKey }: ParticipantsTableProps) {
   const { t } = useI18n();
-  const participants = getParticipants();
+  const [participants, setParticipants] = useState<ParticipantWithTest[]>([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const totalPages = Math.ceil(participants.length / perPage);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchParticipants()
+      .then(data => setParticipants(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [refreshKey]);
+
+  const totalPages = Math.max(1, Math.ceil(participants.length / perPage));
   const paged = participants.slice((page - 1) * perPage, page * perPage);
 
   const toggleSelect = (id: string) => {
@@ -32,6 +43,22 @@ export default function ParticipantsTable({ selectedIds, onSelectionChange, show
       onSelectionChange(paged.map(p => p.id));
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (participants.length === 0) {
+    return (
+      <div className="text-center py-12 text-sm text-muted-foreground">
+        Nenhum participante cadastrado.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -97,7 +124,7 @@ export default function ParticipantsTable({ selectedIds, onSelectionChange, show
                     className="accent-primary"
                   />
                 </td>
-                <td className="py-2 px-2 text-foreground">{p.fullName}</td>
+                <td className="py-2 px-2 text-foreground">{p.full_name}</td>
                 <td className="py-2 px-2">
                   <span className={`px-2 py-0.5 rounded text-xs ${
                     p.testPerformed === 'Aud.IT'

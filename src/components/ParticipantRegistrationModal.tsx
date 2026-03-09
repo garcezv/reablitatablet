@@ -2,19 +2,24 @@ import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import InfoBanner from './InfoBanner';
 import CancelWarningModal from './CancelWarningModal';
-import { addParticipant } from '@/lib/data';
+import { createParticipant } from '@/lib/participants';
+import { useAuth } from '@/hooks/useAuth';
 import { Upload, Loader2 } from 'lucide-react';
 import { useCep } from '@/hooks/use-cep';
 import { isValidCPF, formatCPF } from '@/lib/cpf';
+import { toast } from 'sonner';
 
 interface Props {
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function ParticipantRegistrationModal({ onClose }: Props) {
+export default function ParticipantRegistrationModal({ onClose, onSuccess }: Props) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [showCancel, setShowCancel] = useState(false);
   const [cpfError, setCpfError] = useState('');
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     cpf: '', fullName: '', birthDate: '', socialName: '',
     rg: '', issuingBody: '', issueDate: '',
@@ -26,7 +31,6 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
   });
 
   const { fetchCep, loading: cepLoading } = useCep();
-
   const update = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
 
   const handleCepBlur = async (cepValue: string) => {
@@ -57,19 +61,56 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isValidCPF(form.cpf)) {
       setCpfError(t('register.invalidCpf'));
       return;
     }
-    addParticipant({
-      ...form,
-      testPerformed: 'Aud.IT',
-      lastTestDate: new Date().toLocaleDateString('pt-BR'),
-      hearingStatus: 'Normal',
-      needsReevaluation: false,
-    });
-    onClose();
+    if (!form.fullName || !form.birthDate || !form.motherName) {
+      toast.error('Preencha os campos obrigatórios.');
+      return;
+    }
+    if (!user) return;
+
+    setSaving(true);
+    try {
+      await createParticipant({
+        cpf: form.cpf,
+        full_name: form.fullName,
+        birth_date: form.birthDate,
+        social_name: form.socialName || null,
+        rg: form.rg || null,
+        issuing_body: form.issuingBody || null,
+        issue_date: form.issueDate || null,
+        bio_sex: form.bioSex || null,
+        gender_identity: form.genderIdentity || null,
+        race: form.race || null,
+        mother_name: form.motherName,
+        father_name: form.fatherName || null,
+        email: form.email || null,
+        phone: form.phone || null,
+        cep: form.cep || null,
+        state: form.state || null,
+        city: form.city || null,
+        neighborhood: form.neighborhood || null,
+        street: form.street || null,
+        number: form.number || null,
+        complement: form.complement || null,
+        institution: form.institution || null,
+        teacher: form.teacher || null,
+        hearing_complaint: form.hearingComplaint || null,
+        complaint_details: form.complaintDetails || null,
+        observations: form.observations || null,
+        created_by: user.id,
+      });
+      toast.success('Participante cadastrado com sucesso!');
+      onSuccess?.();
+      onClose();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao cadastrar participante.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const Field = ({ label, k, placeholder, required, type, span }: { label: string; k: string; placeholder?: string; required?: boolean; type?: string; span?: number }) => (
@@ -109,7 +150,6 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
         <h2 className="text-lg font-bold text-foreground">{t('register.title')}</h2>
         <InfoBanner text={t('register.lgpd')} variant="warning" />
 
-        {/* Dados de identificação */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.idSection')}</h3>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -136,7 +176,6 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
           <Field label={t('register.issueDate')} k="issueDate" type="date" required />
         </div>
 
-        {/* Dados complementares */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.complementary')}</h3>
         <div className="grid grid-cols-2 gap-3">
           <SelectField label={t('register.bioSex')} k="bioSex" options={['Masculino', 'Feminino', 'Intersexo']} />
@@ -148,14 +187,12 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
           <Field label={t('register.fatherName')} k="fatherName" placeholder="Ex: José da Silva" />
         </div>
 
-        {/* Contatos */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.contacts')}</h3>
         <div className="grid grid-cols-2 gap-3">
           <Field label={t('register.personalEmail')} k="email" placeholder="nome@email.com" type="email" />
           <Field label={t('register.phone')} k="phone" placeholder="(DDD) 9000-0000" />
         </div>
 
-        {/* Endereço */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.address')}</h3>
         <div className="grid grid-cols-3 gap-3">
           <div>
@@ -181,7 +218,6 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
         </div>
         <Field label={t('register.complement')} k="complement" placeholder="Ex: Apt 00" />
 
-        {/* Informações adicionais */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.additional')}</h3>
         <div className="grid grid-cols-2 gap-3">
           <Field label={t('register.institution')} k="institution" required />
@@ -208,7 +244,6 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
           />
         </div>
 
-        {/* Documentos */}
         <h3 className="font-semibold text-foreground text-sm">{t('register.documents')}</h3>
         <p className="text-xs text-muted-foreground">{t('register.documentsNote')}</p>
         <div className="border-2 border-dashed border-primary rounded-md p-6 flex flex-col items-center text-primary cursor-pointer">
@@ -216,7 +251,6 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
           <span className="text-sm">{t('register.addFile')}</span>
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 pt-2">
           <button
             onClick={() => setShowCancel(true)}
@@ -226,9 +260,10 @@ export default function ParticipantRegistrationModal({ onClose }: Props) {
           </button>
           <button
             onClick={handleSubmit}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-md text-sm font-semibold"
+            disabled={saving}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-md text-sm font-semibold disabled:opacity-50"
           >
-            {t('register.submit')}
+            {saving ? 'Salvando...' : t('register.submit')}
           </button>
         </div>
       </div>
