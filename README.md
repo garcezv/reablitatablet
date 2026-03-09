@@ -792,3 +792,10 @@ Cada participante possui um resultado de teste associado com status auditivo (no
 ---
 
 *Documentação atualizada em 09/03/2026 para o projeto reab.LITA.*
+---
+
+## Licença
+
+©2026 Rede reab.LITA. Todos os direitos reservados.
+
+Hospital Universitário Onofre Lopes (HUOL) — Universidade Federal do Rio Grande do Norte (UFRN)
